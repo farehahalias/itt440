@@ -1,13 +1,16 @@
+
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 
 int main (int argc, char *argv[])
 {
-   int socket_desc, client_sock, c, read_size;
+   int socket_desc, client_sock, c, read_size,value,len;
    struct sockaddr_in server, client;
+   struct timeval timeo;
    char client_message[2000];
 
    socket_desc = socket(AF_INET , SOCK_STREAM, 0);
@@ -39,17 +42,23 @@ int main (int argc, char *argv[])
           }
        puts("Connection accepted");
 
-         while((read_size = recv(client_sock , client_message , 2000, 0))>0)
-          { write(client_sock, client_message, strlen(client_message));
-           }
-          if(read_size == 0)
-            {
-               puts("Client disconnected");
-              fflush(stdout);
-             }
-           else if (read_size == -1)
-             {
-               perror("recv failed");
-             }
+        getsockopt(socket_desc, SOL_SOCKET, SO_SNDBUF, &value, &len);
+        if(value == 0)
+          printf("Unable Get \n");
+        else
+           printf("Can Get %d\n ",value);
+        
+        value = 32768;
+        setsockopt( socket_desc, SOL_SOCKET,SO_SNDBUF,&value, sizeof(value));
+         printf("Set !! \n ");
+
+        getsockopt(socket_desc, SOL_SOCKET, SO_SNDBUF, &value, &len);
+        if(value == 0)
+          printf("Unable Get New\n");
+        else
+           printf("Can Get New %d\n ",value);
+
+
+
           return 0;
 }
